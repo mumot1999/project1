@@ -40,11 +40,13 @@ Route::get('valid', function () {
 
 Route::get('jobs', function () {
   $orders = new App\Orders;
-  // echo $orders -> getOrdersToDo();
+  // return $orders -> getAllWithStats();
+   echo $orders -> getJob(1,'facebook','like');
+   return;
   // echo $orders -> getJob(1,1,1);
   // echo $orders -> attemptedOrders;
   $orders = $orders ->  with(['attemptedOrders' => function($query) {
     $query ->  where('user_id', '=', 1);
   }]) -> get();
-  echo $orders;
+  echo $orders->tojson();
 });

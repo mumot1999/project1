@@ -11,14 +11,15 @@ class AttemptedOrders extends Model
       return $this -> belongsTo('App\Orders', 'id');
     }
 
-    // public function valid()
-    // {
-    //   return $this -> hasOne('App\ValidOrderAttemps', 'attempt_id');
-    // }
-
-    public function isValid($id)
+    public function valid()
     {
-      if($this -> find($id) -> validAttemps != NULL) return true;
+      return $this -> hasOne('App\ValidOrderAttemps', 'attempt_id');
+    }
+
+    public function isValid()
+    {
+      if($this -> valid == 1)
+        return true;
       return false;
     }
 

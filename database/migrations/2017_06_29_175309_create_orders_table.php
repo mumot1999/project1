@@ -20,7 +20,7 @@ class CreateOrdersTable extends Migration
             $table->integer('score_target');
             $table->integer('site_id')->unsigned();
             $table->integer('action_id')->unsigned();
-            $table->integer('cost');
+            $table->integer('price');
             $table->DateTime('expiry_date');
             $table->timestamps();
         });

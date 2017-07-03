@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sites extends Model
 {
-    public function getSiteId($name)
-    {
-      return $this -> where('name', $name) -> id;
-    }
+    public $timestamps = false;
+
 }

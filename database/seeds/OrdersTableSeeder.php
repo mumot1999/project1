@@ -17,7 +17,7 @@ class OrdersTableSeeder extends Seeder
       $seed -> score_target = 100;
       $seed -> site_id = 1;
       $seed -> action_id = 2;
-      $seed -> cost = 10;
+      $seed -> price = 10;
       $seed -> expiry_date = "2017-07-01 00:00:00";
       $seed -> save();
 
@@ -27,7 +27,7 @@ class OrdersTableSeeder extends Seeder
       $seed -> score_target = 1001;
       $seed -> site_id = 1;
       $seed -> action_id = 2;
-      $seed -> cost = 7;
+      $seed -> price = 7;
       $seed -> expiry_date = "2017-07-01 00:00:00";
       $seed -> save();
     }

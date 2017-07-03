@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OrderParams;
 
 class Orders extends Model
 {
@@ -15,7 +16,7 @@ class Orders extends Model
 
     public function attemptedOrders()
     {
-      return $this -> hasOne('App\AttemptedOrders', 'order_id');
+      return $this -> hasMany('App\AttemptedOrders', 'order_id');
     }
 
     public function site()
@@ -28,186 +29,74 @@ class Orders extends Model
       return $this -> hasOne('App\ActionType', 'id', 'action_id');
     }
 
-    // public function valid()
-    // {
-    //   return $this -> hasOne('App\ValidOrderAttemps', 'attempted_orders', 'attempt_id', 'order_id');
-    // }
-
-
-
-    public function getJob($userId, $siteId, $actionTypeId)
+    public function getJob($userId, $site, $actionType)
     {
-      $orders = $this -> getOrdersToDo();
-      echo $orders -> get(0) -> attempted_orders;
-      // $orders -> each(function($item, $key){
-      //   echo $item -> attempted_orders -> id;
-      // });
+      $orderParams = array('userId' => $userId, 'site' => $site, 'action' => $actionType);
+      $orders = $this -> getOrdersToDo($orderParams);
 
-      // foreach ($this -> all() as $order => $user_id) {
-      //   echo $user_id -> attemptedOrders;
-      //   // if($order -> attemptedOrders -> user_id != $userId) echo 'ok ';
-      // }
-      // $orders = $this -> attemptedOrders() -> where('user_id', '!=', $userId);
-      // return $orders -> first() -> order -> action -> name;
-      // foreach ($orders as $order) {
-      //
-      // }
-      // return $this -> where()
+      $count = $orders -> count();
+      if($count == 0)
+        return 'error';
+      // else if ($count == 1)
+      //   return $orders -> first();
+
+      else return $orders -> random();
     }
 
-    public function getOrdersToDo()
+    public function getOrdersToDo($orderParams)
     {
-      $orders = $this -> all();
-       $filtered = collect();
-      foreach ($orders as $order) {
-        $ratio = 0;
-        $order -> ratio();
-        if($ratio < 100)
-        {
-          $filtered ->push($order);
-        }
-      }
+      $orders = $this -> with(['attemptedOrders', 'site', 'action']) -> get();
 
-      return $filtered;
+      $filtered = $orders->filter(function ($value, $key) use ($orderParams) {
+        if($value->checkIfOk($orderParams))
+          return $value;
+      });
+
+      $highestPrice = $filtered -> max('price');
+
+      return $filtered -> where('price', $highestPrice);
     }
 
-    public function ratio()
+    private function checkIfOk($orderParams)
     {
-      $scoreTarget = $this -> score_target;
-      $actualScore = 0;
-      // var_dump( $this -> attemptedOrders['valid']);
-      $attemptedOrders = $this -> attemptedOrders;
-      $valid = $attemptedOrders['valid'];
-        if($valid == 1)
-          $actualScore++;
+      $userId = $orderParams['userId'];
+      $site = $orderParams['site'];
+      $action = $orderParams['action'];
 
-
-      $percentage = ($actualScore / $scoreTarget) * 100;
-
-      // return array('score_target' => $scoreTarget, 'score_now' => $actualScore, 'percentage' => $percentage);
-      return $percentage;
+      if(!$this -> isFinished() && $this -> canUserDo($userId) && $this -> isSite($site) && $this -> isAction($action))
+        return true;
+      return 0;
     }
 
-    public function checkOrder()
+    private function isFinished()
     {
-      if($this -> first() -> attemptedOrders -> valid) return false;
-
+      $count = $this -> attemptedOrders -> count();
+      $target = $this -> score_target;
+      if($count < $target)
+        return false;
       return true;
     }
 
-    public function getFreeOrders($userId)
+    private function canUserDo($userId)
     {
-      echo 1;
-      $userId =1;
-      // $orders = array();
-      // foreach ($this -> all() as $order) {
-      //   if($order -> attemptedOrders -> valid) return false;
-      //
-      // }
-      //
-      // return true;
-      $attemps = $this -> attemptedOrders() -> where('user_id', $userId) -> get();
-      // echo $attemps;
-      foreach ($attemps as $attemp) {
-        echo $attemp;
+      foreach ($this -> attemptedOrders as $attemtedOrder) {
+        if($attemtedOrder -> user_id == $userId && $attemtedOrder -> isValid())
+          return false;
       }
-      // $orders = \App\Orders::all();
-      // foreach ($orders as $order) {
-      //   echo $order -> attemptedOrders;
-      // }
-      // return $this -> attemptedOrders ;
+      return true;
     }
 
+    private function isSite($site)
+    {
+      if($this -> site -> name == $site)
+        return true;
+      return false;
+    }
 
-
-
+    private function isAction($action)
+    {
+      if($this -> action -> name == $action)
+        return true;
+      return false;
+    }
 }
-//
-//
-// <?php
-//
-// namespace App;
-//
-// use Illuminate\Database\Eloquent\Model;
-//
-// class Orders extends Model
-// {
-//     public function owner()
-//     {
-//         return $this -> belongsTo('App\User', 'user_id');
-//     }
-//
-//     public function attemptedOrders()
-//     {
-//       return $this -> hasMany('App\AttemptedOrders', 'order_id');
-//     }
-//
-//     public function site()
-//     {
-//       return $this -> hasOne('App\Sites', 'id', 'site_id');
-//     }
-//
-//     public function action()
-//     {
-//       return $this -> hasOne('App\ActionType', 'id', 'action_id');
-//     }
-//
-//     public function getOrderDetails()
-//     {
-//       $scoreTarget = $this -> score_target;
-//       $actualScore = 0;
-//       $attemptedOrders = $this -> attemptedOrders;
-//
-//       foreach ($attemptedOrders as $attemptedOrder) {
-//         if($attemptedOrder -> valid)
-//           $actualScore++;
-//       }
-//
-//       $percentage = ($actualScore / $scoreTarget) * 100;
-//
-//       return array('score_target' => $scoreTarget, 'score_now' => $actualScore, 'percentage' => $percentage);
-//     }
-//
-//     public function getJob($userId, $siteId, $actionTypeId)
-//     {
-//       $orders = array();
-//       $attemptedOrders = $this -> attemptedOrders() -> where('user_id', '!=', $userId);
-//       foreach ($attemptedOrders as $attemptedOrder) {
-//
-//         $orders -> pull();
-//       }
-//
-//       return $attemptedOrders -> first() -> order;
-//       // foreach ($orders as $order) {
-//       //
-//       // }
-//       // return $this -> where()
-//     }
-//
-//     public function getFreeOrders($userId)
-//     {
-//       echo 1;
-//       $userId =1;
-//       // $orders = array();
-//       // foreach ($this -> all() as $order) {
-//       //   if($order -> attemptedOrders -> valid) return false;
-//       //
-//       // }
-//       //
-//       // return true;
-//       $attemps = $this -> attemptedOrders() -> where('user_id', $userId) -> get();
-//       // echo $attemps;
-//       foreach ($attemps as $attemp) {
-//         echo $attemp;
-//       }
-//       // $orders = \App\Orders::all();
-//       // foreach ($orders as $order) {
-//       //   echo $order -> attemptedOrders;
-//       // }
-//       // return $this -> attemptedOrders ;
-//     }
-//
-//
-//
-//
-// }

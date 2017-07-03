@@ -13,11 +13,11 @@ class CreateValidOrderAttempsTable extends Migration
      */
     public function up()
     {
-        Schema::create('valid_order_attemps', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('attempt_id')->unique();
-            $table->timestamps();
-        });
+        // Schema::create('valid_order_attemps', function (Blueprint $table) {
+        //     $table->increments('id');
+        //     $table->integer('attempt_id')->unique();
+        //     $table->timestamps();
+        // });
     }
 
     /**
