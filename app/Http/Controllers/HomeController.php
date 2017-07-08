@@ -25,7 +25,7 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        echo $user->getEranedCoins();
+        echo $user->getCoinsBalance();
         // foreach ( $user->orders as $order) {
         //     echo $order->url;
         // }

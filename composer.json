@@ -7,8 +7,14 @@
     "require": {
         "php": ">=5.6.4",
         "barryvdh/laravel-debugbar": "^2.4",
+        "guzzlehttp/guzzle": "^6.3",
+        "kozz/laravel-guzzle-provider": "~6.0",
         "laravel/framework": "5.4.*",
-        "laravel/tinker": "~1.0"
+        "laravel/tinker": "~1.0",
+        "php-http/guzzle6-adapter": "^1.1",
+        "php-http/message": "^1.5",
+        "symfony/http-foundation": "^3.3",
+        "vinkla/instagram": "^7.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

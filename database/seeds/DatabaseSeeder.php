@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AttemptedOrdersTableSeeder::class);
         // $this->call(ValidOrderAttempsTableSeeder::class);
         $this->call(ActionTypeTableSeeder::class);
+        $this->call(StartupCoinsTableSeeder::class);
     }
 }

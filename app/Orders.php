@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use OrderParams;
+use Illuminate\Support\Facades\Auth;
 
 class Orders extends Model
 {
-  protected $fillable = ['user_id'];
-
+  protected $fillable = [
+      'user_id', 'url', 'score_target', 'site_id', 'action_id', 'price', 'expiry_date'
+  ];
     public function owner()
     {
         return $this -> belongsTo('App\User', 'user_id');
@@ -29,9 +31,9 @@ class Orders extends Model
       return $this -> hasOne('App\ActionType', 'id', 'action_id');
     }
 
-    public function getJob($userId, $site, $actionType)
+    public function getJob($site, $actionType)
     {
-      $orderParams = array('userId' => $userId, 'site' => $site, 'action' => $actionType);
+      $orderParams = array('userId' => Auth::id(), 'site' => $site, 'action' => $actionType);
       $orders = $this -> getOrdersToDo($orderParams);
 
       $count = $orders -> count();
@@ -57,46 +59,66 @@ class Orders extends Model
       return $filtered -> where('price', $highestPrice);
     }
 
-    private function checkIfOk($orderParams)
-    {
-      $userId = $orderParams['userId'];
-      $site = $orderParams['site'];
-      $action = $orderParams['action'];
 
-      if(!$this -> isFinished() && $this -> canUserDo($userId) && $this -> isSite($site) && $this -> isAction($action))
-        return true;
-      return 0;
-    }
+        private function checkIfOk($orderParams)
+        {
+          $userId = $orderParams['userId'];
+          $site = $orderParams['site'];
+          $action = $orderParams['action'];
 
-    private function isFinished()
-    {
-      $count = $this -> attemptedOrders -> count();
-      $target = $this -> score_target;
-      if($count < $target)
-        return false;
-      return true;
-    }
+          if(!$this -> isFinished() && $this -> canUserDo($userId) && $this -> isSite($site) && $this -> isAction($action))
+            return true;
+          return 0;
+        }
 
-    private function canUserDo($userId)
-    {
-      foreach ($this -> attemptedOrders as $attemtedOrder) {
-        if($attemtedOrder -> user_id == $userId && $attemtedOrder -> isValid())
+        private function isFinished()
+        {
+          $count = $this -> attemptedOrders -> count();
+          $target = $this -> score_target;
+          if($count < $target)
+            return false;
+          return true;
+        }
+
+        private function canUserDo($userId)
+        {
+          if($this -> user_id == $userId) return false;
+          foreach ($this -> attemptedOrders as $attemtedOrder) {
+            if($attemtedOrder -> user_id == $userId && $attemtedOrder -> isValid())
+              return false;
+          }
+          return true;
+        }
+
+        private function isSite($site)
+        {
+          if($this -> site -> name == $site)
+            return true;
           return false;
+        }
+
+        private function isAction($action)
+        {
+          if($this -> action -> name == $action)
+            return true;
+          return false;
+        }
+
+    public function makeNewOrder()
+    {
+      $user = Auth::User();
+      $balance = $user -> getCoinsBalance();
+
+      if($this -> getCost() > $balance) return 1;
+      else {
+        $this -> save();
       }
-      return true;
+
     }
 
-    private function isSite($site)
-    {
-      if($this -> site -> name == $site)
-        return true;
-      return false;
-    }
+        private function getCost()
+        {
+          return $this -> score_target * $this -> price;
+        }
 
-    private function isAction($action)
-    {
-      if($this -> action -> name == $action)
-        return true;
-      return false;
-    }
 }

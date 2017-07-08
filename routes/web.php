@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +18,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'UserController@index')->name('home');
 
 Route::get('orders', function () {
   $orders = App\Orders::find(1);
@@ -38,15 +39,20 @@ Route::get('valid', function () {
 
 });
 
-Route::get('jobs', function () {
+Route::get('job/{site}/{action}', function ($site, $action) {
   $orders = new App\Orders;
-  // return $orders -> getAllWithStats();
-   echo $orders -> getJob(1,'facebook','like');
-   return;
-  // echo $orders -> getJob(1,1,1);
-  // echo $orders -> attemptedOrders;
-  $orders = $orders ->  with(['attemptedOrders' => function($query) {
-    $query ->  where('user_id', '=', 1);
-  }]) -> get();
-  echo $orders->tojson();
+  return $orders -> getJob($site,$action);
+});
+
+Route::get('likes/', function () {
+  $attempts = new App\AttemptedOrders;
+  return $attempts -> instagramLikes('as');
+});
+
+Route::get('makeOrder', function () {
+  $user = new App\User;
+
+  return $user -> getCoinsBalance();
+  $orders = new App\Orders;
+  return $orders -> makeNewOrder(0);
 });

@@ -14,7 +14,7 @@ class OrdersTableSeeder extends Seeder
       $seed = new App\Orders();
       $seed -> user_id = 1;
       $seed -> url = "facebook.pl/moje_zdj";
-      $seed -> score_target = 100;
+      $seed -> score_target = 10;
       $seed -> site_id = 1;
       $seed -> action_id = 2;
       $seed -> price = 10;
@@ -24,7 +24,7 @@ class OrdersTableSeeder extends Seeder
       $seed = new App\Orders();
       $seed -> user_id = 1;
       $seed -> url = "facebook.pl/moje_zdj2";
-      $seed -> score_target = 1001;
+      $seed -> score_target = 10;
       $seed -> site_id = 1;
       $seed -> action_id = 2;
       $seed -> price = 7;

@@ -37,28 +37,34 @@ class User extends Authenticatable
       return $this -> hasMany('App\AttemptedOrders', 'user_id');
     }
 
-    public function getEranedCoins()
+
+
+
+
+    public function getCoinsBalance()
     {
-      $attemptedOrders = $this -> attemptedOrders;
-      $coins = 0;
-
-      foreach ($attemptedOrders as $attemptedOrder) {
-        if($attemptedOrder-> valid)
-        {
-          $coins += $attemptedOrder->order->cost;
-        }
-      }
-
-      return $coins;
+      return $this -> getEarnedCoins() - $this -> getIssuedCoins() + $this -> getStartupBonus();
     }
 
-    public function findOrder($siteName)
+    private function getEarnedCoins()
     {
-      $sites = new App\Sites;
-      $siteId = $sites -> getSiteId($siteName);
+      $attemptedOrders = $this -> attemptedOrders() -> with('order') -> where('valid',1) -> where('user_id', '!=', $this -> id) -> get();
+      return $attemptedOrders -> sum('order.price');
+    }
 
+    private function getIssuedCoins()
+    {
+      $issued = 0;
+      $orders = $this -> orders() -> with('attemptedOrders') -> get();
+      foreach ($orders as $order) {
+        $issued += $order -> price * $order -> score_target;
+      }
+      return $issued;
+    }
 
-      $orders = $this -> orders -> where(site_id, $siteId) -> where($id, '!=', $id);
-
+    private function getStartupBonus()
+    {
+      $start = new \App\StartupCoins;
+      return $start -> getCoins($this -> id, $this -> created_at);
     }
 }

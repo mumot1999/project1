@@ -16,6 +16,7 @@ class CreateBoughtCoinsTable extends Migration
         Schema::create('bought_coins', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->integer('amount')->unsigned();
             $table->string('transaction_id');
             $table->timestamps();
         });
