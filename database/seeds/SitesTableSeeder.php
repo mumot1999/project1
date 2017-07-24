@@ -11,7 +11,7 @@ class SitesTableSeeder extends Seeder
      */
     public function run()
     {
-      $sites = ['facebook', 'instagram', 'twitter'];
+      $sites = ['Facebook', 'Instagram', 'Twitter'];
 
       foreach ($sites as $site) {
         $seed = new App\Sites();

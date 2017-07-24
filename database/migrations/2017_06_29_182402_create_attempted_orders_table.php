@@ -18,11 +18,8 @@ class CreateAttemptedOrdersTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('order_id')->unsigned();
             $table->integer('valid')->unsigned();
-
-            $table->json('usernames') -> nullable();
-
-            // $table->DateTime('start');
-            // $table->DateTime('end');
+            $table->DateTime('start');
+            $table->DateTime('end')->nullable();
             $table->timestamps();
         });
 

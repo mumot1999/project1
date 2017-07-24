@@ -4,6 +4,9 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Carbon\Carbon;
+use Debugbar;
+use App\Orders;
 
 class User extends Authenticatable
 {
@@ -32,6 +35,21 @@ class User extends Authenticatable
       return $this -> hasMany('App\Orders', 'user_id');
     }
 
+    public function getOrders($limit = -1)
+    {
+      $orders = $this->orders()->with(['attemptedOrders', 'site', 'action'])->orderBy('created_at', 'desc')
+      ->where(function ($query) {
+        $query->where( 'expiry_date', '>', Carbon::now() )->orWhere( 'expiry_date', null );
+      })-> limit($limit)->get();
+
+       $orders = $orders->filter(function ($value, $key){
+         if(!$value->isFinished())
+          return $value;
+      });
+
+      return $orders;
+    }
+
     public function attemptedOrders()
     {
       return $this -> hasMany('App\AttemptedOrders', 'user_id');
@@ -48,7 +66,8 @@ class User extends Authenticatable
 
     private function getEarnedCoins()
     {
-      $attemptedOrders = $this -> attemptedOrders() -> with('order') -> where('valid',1) -> where('user_id', '!=', $this -> id) -> get();
+      $attemptedOrders = $this -> attemptedOrders() -> with('order') -> where('valid',1) -> get();
+      Debugbar::info($attemptedOrders->toJson());
       return $attemptedOrders -> sum('order.price');
     }
 
@@ -57,7 +76,10 @@ class User extends Authenticatable
       $issued = 0;
       $orders = $this -> orders() -> with('attemptedOrders') -> get();
       foreach ($orders as $order) {
-        $issued += $order -> price * $order -> score_target;
+        if($order->isActual())
+          $issued += $order -> price * $order -> score_target;
+        else
+          $issued += $order -> price * $order -> getActualScore();
       }
       return $issued;
     }

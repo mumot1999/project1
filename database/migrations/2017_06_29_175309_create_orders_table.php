@@ -21,7 +21,7 @@ class CreateOrdersTable extends Migration
             $table->integer('site_id')->unsigned();
             $table->integer('action_id')->unsigned();
             $table->integer('price');
-            $table->DateTime('expiry_date');
+            $table->DateTime('expiry_date')->nullable();
             $table->timestamps();
         });
 

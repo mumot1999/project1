@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use OrderParams;
 use Illuminate\Support\Facades\Auth;
 
+use App\Sites;
+use Carbon\Carbon;
+
 class Orders extends Model
 {
   protected $fillable = [
       'user_id', 'url', 'score_target', 'site_id', 'action_id', 'price', 'expiry_date'
   ];
-    public function owner()
+    public function user()
     {
         return $this -> belongsTo('App\User', 'user_id');
     }
@@ -38,12 +41,13 @@ class Orders extends Model
 
       $count = $orders -> count();
       if($count == 0)
-        return 'error';
+        return null;
       // else if ($count == 1)
       //   return $orders -> first();
 
       else return $orders -> random();
     }
+
 
     public function getOrdersToDo($orderParams)
     {
@@ -71,13 +75,13 @@ class Orders extends Model
           return 0;
         }
 
-        private function isFinished()
+        public function isFinished()
         {
-          $count = $this -> attemptedOrders -> count();
+          $count = $this -> getActualScore();
           $target = $this -> score_target;
-          if($count < $target)
-            return false;
-          return true;
+          if($count >= $target)
+            return true;
+          return false;
         }
 
         private function canUserDo($userId)
@@ -104,6 +108,15 @@ class Orders extends Model
           return false;
         }
 
+        public function isActual()
+        {
+          if($this->expiry_date == NULL) return true;
+          if($this->expiry_date > Carbon::now() ) return true;
+
+          return false;
+        }
+
+
     public function makeNewOrder()
     {
       $user = Auth::User();
@@ -121,4 +134,32 @@ class Orders extends Model
           return $this -> score_target * $this -> price;
         }
 
-}
+    public function setSiteByName($name)
+    {
+      $site = new Sites;
+
+      $this -> site_id = $site -> getId($name);
+    }
+
+    public function setActionByName($name)
+    {
+      $action = new ActionType;
+
+      $this -> action_id = $action -> getId($name);
+    }
+
+    public function end()
+    {
+      $this -> expiry_date = Carbon::now();
+      $this -> save();
+    }
+
+    public function getActualScore()
+    {
+      $score = 0;
+      foreach ($this -> attemptedOrders as $attemptedOrder) {
+        if($attemptedOrder->isValid()) $score++;
+      }
+      return $score;
+    }
+ }

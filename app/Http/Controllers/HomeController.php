@@ -26,6 +26,8 @@ class HomeController extends Controller
     {
         $user = Auth::user();
         echo $user->getCoinsBalance();
+
+
         // foreach ( $user->orders as $order) {
         //     echo $order->url;
         // }

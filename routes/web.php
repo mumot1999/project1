@@ -12,13 +12,43 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
+
 Route::get('/', function () {
     return view('welcome');
 });
 
 Auth::routes();
 
-Route::get('/home', 'UserController@index')->name('home');
+Route::group(['middleware' => ['auth']], function () {
+
+  Route::get('/home', 'UserController@index')->name('home');
+
+  Route::post('/makeNewOrder',[
+    'uses' => 'OrderController@makeNewOrder',
+    'as' => 'order.make'
+  ]);
+
+  Route::get('/deleteOrder/{order_id}',[
+    'uses' => 'OrderController@deleteOrder',
+    'as' => 'order.delete'
+  ]);
+
+  Route::get('/endJobs',[
+    'uses' => 'AttemptedOrdersController@getEndJob',
+    'as' => 'attemptedOrders.end'
+  ]);
+
+  Route::post('/getJob',[
+    'uses' => 'OrderController@postGetJob',
+    'as' => 'order.getJob'
+  ]);
+
+  Route::post('/setInstaNick',[
+    'uses' => 'UserController@setInstagramNick',
+    'as' => 'user.setInstagramNick'
+  ]);
+
+});
 
 Route::get('orders', function () {
   $orders = App\Orders::find(1);
@@ -45,8 +75,8 @@ Route::get('job/{site}/{action}', function ($site, $action) {
 });
 
 Route::get('likes/', function () {
-  $attempts = new App\AttemptedOrders;
-  return $attempts -> instagramLikes('as');
+  $insta = new App\Instagram;
+  return $insta -> instagramLikes(null);
 });
 
 Route::get('makeOrder', function () {
@@ -55,4 +85,11 @@ Route::get('makeOrder', function () {
   return $user -> getCoinsBalance();
   $orders = new App\Orders;
   return $orders -> makeNewOrder(0);
+});
+
+Route::get('insta/{nick}', function ($nick) {
+  $insta = new App\Instagram;
+
+  return $insta -> getUserId($nick);
+
 });

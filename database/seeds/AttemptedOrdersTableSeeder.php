@@ -11,10 +11,10 @@ class AttemptedOrdersTableSeeder extends Seeder
      */
     public function run()
     {
-      $attemptedOrders = new \App\AttemptedOrders;
-      $attemptedOrders -> user_id = 1;
-      $attemptedOrders -> order_id = 1;
-      $attemptedOrders -> valid = 1;
-      $attemptedOrders -> save();
+      // $attemptedOrders = new \App\AttemptedOrders;
+      // $attemptedOrders -> user_id = 1;
+      // $attemptedOrders -> order_id = 1;
+      // $attemptedOrders -> valid = 1;
+      // $attemptedOrders -> save();
     }
 }

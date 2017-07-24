@@ -11,7 +11,7 @@ class ActionTypeTableSeeder extends Seeder
      */
     public function run()
     {
-        $names = ['follow', 'like', 'view'];
+        $names = ['Follow', 'Like', 'View'];
 
         foreach ($names as $name) {
           $action = new \App\ActionType;
